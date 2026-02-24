@@ -34,15 +34,16 @@ python test/chatterbox.py              # Storytelling with emotion tags
 
 ## Architecture
 
-This is a text-to-speech synthesis workspace using Apple's MLX framework with three primary modes:
+This is a text-to-speech synthesis workspace using Apple's MLX framework with four primary modes:
 
-### Three Modes
+### Four Modes
 
-| Mode             | Purpose                             | Entry Point                                |
-| ---------------- | ----------------------------------- | ------------------------------------------ |
-| **Custom Voice** | Preset speakers + emotion control   | `CustomVoice` tab / `/api/v1/custom-voice` |
-| **Voice Design** | Natural language voice descriptions | `VoiceDesign` tab / `/api/v1/voice-design` |
-| **Voice Clone**  | Clone from reference audio          | `VoiceClone` tab / `/api/v1/base/clone`    |
+| Mode                        | Purpose                             | Entry Point                                   |
+| --------------------------- | ----------------------------------- | --------------------------------------------- |
+| **Custom Voice**            | Preset speakers + emotion control   | `CustomVoice` tab / `/api/v1/custom-voice`    |
+| **Voice Design**            | Natural language voice descriptions | `VoiceDesign` tab / `/api/v1/voice-design`    |
+| **Voice Clone**             | Clone from reference audio          | `VoiceClone` tab / `/api/v1/base/clone`       |
+| **Multi-Person Conversation** | Multi-speaker conversations       | `Conversation` tab / `/api/v1/conversation`   |
 
 ### Models
 
@@ -101,6 +102,62 @@ GET  /api/v1/languages                # List available languages
 POST /api/v1/voice-design/generate    # Generate voice from description
 ```
 
+### Multi-Person Conversation Endpoints
+
+```
+POST /api/v1/conversation/generate    # Generate multi-speaker conversation
+```
+
+**Request Format:**
+
+```json
+{
+  "speakers": [
+    {
+      "voice_source": "voice_design",
+      "text": "Hello!",
+      "instruct": "A warm, friendly male voice",
+      "language": "English"
+    },
+    {
+      "voice_source": "saved_voice",
+      "text": "Hi there!",
+      "prompt_id": "abc123-def456",
+      "language": "English"
+    }
+  ],
+  "speed": 1.0,
+  "response_format": "base64"
+}
+```
+
+**Voice Source Options:**
+- `voice_design`: Use `instruct` field with natural language voice description
+- `saved_voice`: Use `prompt_id` field referencing a saved voice from Voice Clone
+
+**Response Format:**
+
+```json
+{
+  "segments": [
+    {
+      "speaker_index": 0,
+      "audio": "<base64_encoded_audio>",
+      "sample_rate": 24000,
+      "duration": 3.5
+    },
+    {
+      "speaker_index": 1,
+      "audio": "<base64_encoded_audio>",
+      "sample_rate": 24000,
+      "duration": 2.8
+    }
+  ],
+  "total_duration": 6.3,
+  "format": "wav"
+}
+```
+
 ### Voice Clone Endpoints
 
 ```
@@ -132,7 +189,7 @@ GET  /                                # Redirects to /demo
 The `static/` folder contains a production-ready web interface:
 
 - **Location**: `http://localhost:7860/demo` (when running `server.py`)
-- **Features**: 3 tabs (Custom Voice, Voice Design, Voice Clone) + Settings
+- **Features**: 4 tabs (Custom Voice, Voice Design, Voice Clone, Multi-Person Conversation) + Settings
 - **Files**: `index.html`, `styles.css`, `app.js`
 - **i18n**: Supports English and Chinese (switchable in UI)
 

@@ -257,7 +257,7 @@ const API_DOCS = {
     },
     'conversation': {
         title: 'Multi-Person Conversation API',
-        description: 'Create multi-speaker conversations using batch inference. Define each speaker\'s voice characteristics and text separately, and the API will generate all audio segments that can be played sequentially.',
+        description: 'Create multi-speaker conversations using batch inference. Define each speaker\'s voice source (Voice Design or Saved Voices), text, and language separately. The API will generate all audio segments that can be played sequentially.',
         endpoint: {
             method: 'POST',
             path: '/api/v1/conversation/generate'
@@ -269,8 +269,10 @@ const API_DOCS = {
         ],
         requestParams: [
             { name: 'speakers', type: 'array', required: true, description: 'Array of speaker objects (minimum 2, maximum 5)' },
+            { name: 'speakers[].voice_source', type: 'string', required: true, description: 'Voice source type: "voice_design" or "saved_voice"' },
             { name: 'speakers[].text', type: 'string', required: true, description: 'Text for this speaker to say' },
-            { name: 'speakers[].instruct', type: 'string', required: true, description: 'Voice description for this speaker (e.g., "A warm, friendly female voice")' },
+            { name: 'speakers[].instruct', type: 'string', required: false, description: 'Voice description prompt (required when voice_source is "voice_design")' },
+            { name: 'speakers[].prompt_id', type: 'string', required: false, description: 'Saved voice prompt ID to use (required when voice_source is "saved_voice"). The server will use the associated ref_audio_base64 and ref_text from the saved prompt.' },
             { name: 'speakers[].language', type: 'string', required: false, description: 'Language code or "Auto" (default: "Auto")' },
             { name: 'speed', type: 'number', required: false, description: 'Speech speed (0.5 to 2.0, default: 1.0)' },
             { name: 'response_format', type: 'string', required: false, description: 'Audio format ("base64" or "float", default: "base64")' }
@@ -278,13 +280,15 @@ const API_DOCS = {
         requestExample: {
             speakers: [
                 {
+                    voice_source: 'voice_design',
                     text: 'Hello! Welcome to our conversation demo.',
                     instruct: 'A warm, friendly male voice with a casual tone',
                     language: 'English'
                 },
                 {
+                    voice_source: 'saved_voice',
                     text: 'Hi there! This is amazing technology.',
-                    instruct: 'A cheerful, energetic female voice with enthusiasm',
+                    prompt_id: 'abc123-def456-ghi789',
                     language: 'English'
                 }
             ],
@@ -320,13 +324,15 @@ const API_DOCS = {
   -d '{
     "speakers": [
       {
+        "voice_source": "voice_design",
         "text": "Hello! Welcome to the demo.",
         "instruct": "A warm, friendly male voice",
         "language": "English"
       },
       {
+        "voice_source": "saved_voice",
         "text": "Hi there! Nice to meet you.",
-        "instruct": "A cheerful female voice",
+        "prompt_id": "abc123-def456",
         "language": "English"
       }
     ],
@@ -1478,8 +1484,8 @@ const state = {
     lastGeneratedAudio: { cv: null, vd: null },
     // Conversation TTS state
     conversationSpeakers: [
-        { id: 1, text: 'Hello! Welcome to our conversation demo.', instruct: 'A warm, friendly male voice with a casual tone', language: 'English' },
-        { id: 2, text: 'Hi there! This is amazing technology.', instruct: 'A cheerful, energetic female voice with enthusiasm', language: 'English' }
+        { id: 1, text: 'Hello! Welcome to our conversation demo.', voice_source: 'voice_design', instruct: 'A warm, friendly male voice with a casual tone', language: 'English' },
+        { id: 2, text: 'Hi there! This is amazing technology.', voice_source: 'voice_design', instruct: 'A cheerful, energetic female voice with enthusiasm', language: 'English' }
     ],
     maxSpeakers: 5,
     minSpeakers: 2,
@@ -1503,19 +1509,35 @@ function switchLanguage(lang) {
     // Update all elements with data-i18n attribute
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.dataset.i18n;
+        const translation = t(key);
+
         if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-            el.placeholder = t(key);
+            el.placeholder = translation;
         } else if (el.tagName === 'OPTION') {
             // For select options, just update text
-            el.textContent = t(key);
+            el.textContent = translation;
+        } else if (el.tagName === 'BUTTON') {
+            // For buttons, find text node after icon span or update existing text
+            const iconSpan = el.querySelector('span:first-child');
+            let textNode = Array.from(el.childNodes).find(node =>
+                node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== ''
+            );
+            if (textNode) {
+                textNode.textContent = ' ' + translation;
+            } else if (iconSpan) {
+                // No text node, add one after the icon
+                iconSpan.after(' ' + translation);
+            } else {
+                el.textContent = translation;
+            }
         } else if (el.children.length === 0) {
             // No children, safe to update textContent
-            el.textContent = t(key);
+            el.textContent = translation;
         } else {
             // Has children, update only text nodes
             el.childNodes.forEach(node => {
                 if (node.nodeType === Node.TEXT_NODE) {
-                    node.textContent = t(key);
+                    node.textContent = translation;
                 }
             });
         }
@@ -1536,6 +1558,9 @@ function switchLanguage(lang) {
     document.querySelectorAll('select[data-i18n] option[data-i18n]').forEach(opt => {
         opt.textContent = t(opt.dataset.i18n);
     });
+
+    // Re-render conversation speakers to update speaker numbers
+    renderConversationSpeakers();
 }
 
 // ============================================
@@ -1963,13 +1988,22 @@ function renderConversationSpeakers() {
     const existingCards = container.querySelectorAll('.conversation-speaker-card');
     existingCards.forEach((card, index) => {
         if (state.conversationSpeakers[index]) {
+            const voiceSourceEl = card.querySelector('.speaker-voice-source:checked');
             const instructEl = card.querySelector('.speaker-instruct');
             const textEl = card.querySelector('.speaker-text');
             const languageEl = card.querySelector('.speaker-language');
+            const promptIdEl = card.querySelector('.speaker-prompt-id:checked');
 
-            if (instructEl) state.conversationSpeakers[index].instruct = instructEl.value;
+            if (voiceSourceEl) state.conversationSpeakers[index].voice_source = voiceSourceEl.value;
             if (textEl) state.conversationSpeakers[index].text = textEl.value;
             if (languageEl) state.conversationSpeakers[index].language = languageEl.value;
+            if (promptIdEl) {
+                state.conversationSpeakers[index].prompt_id = promptIdEl.value;
+            }
+            // Save instruct from textarea
+            if (instructEl) {
+                state.conversationSpeakers[index].instruct = instructEl.value;
+            }
         }
     });
 
@@ -1979,24 +2013,77 @@ function renderConversationSpeakers() {
         const card = document.createElement('div');
         card.className = 'conversation-speaker-card';
         card.dataset.speakerIndex = index;
+
+        // Build saved voices cards
+        let savedVoicesHtml = '';
+        if (state.savedPrompts.length === 0) {
+            savedVoicesHtml = `<div class="saved-voices-empty">
+                <p>No saved voices yet. Go to <strong>Voice Clone</strong> tab to create one.</p>
+            </div>`;
+        } else {
+            savedVoicesHtml = `<div class="saved-voices-grid">`;
+            state.savedPrompts.forEach(prompt => {
+                const isSelected = speaker.prompt_id === prompt.prompt_id;
+                savedVoicesHtml += `
+                    <label class="saved-voice-card${isSelected ? ' selected' : ''}">
+                        <input type="radio" name="speaker-${index}-prompt" class="speaker-prompt-id" value="${prompt.prompt_id}" ${isSelected ? 'checked' : ''}>
+                        <div class="saved-voice-card-content">
+                            <span class="saved-voice-name">${prompt.name || 'Voice ' + prompt.prompt_id.substring(0, 8)}</span>
+                            <span class="saved-voice-text">${prompt.ref_text ? prompt.ref_text.substring(0, 50) + '...' : 'No transcript'}</span>
+                        </div>
+                    </label>
+                `;
+            });
+            savedVoicesHtml += `</div>`;
+        }
+
+        // Determine which panel to show
+        const voiceDesignStyle = speaker.voice_source === 'voice_design' ? 'block' : 'none';
+        const savedVoiceStyle = speaker.voice_source === 'saved_voice' ? 'block' : 'none';
+
         card.innerHTML = `
             <div class="speaker-card-header">
                 <span class="speaker-number">${t('speakerNumber')} ${index + 1}</span>
                 <button class="btn-remove-speaker" data-speaker-index="${index}" title="Remove speaker">×</button>
             </div>
-            <div class="form-group">
-                <label class="form-label">${t('voiceDescription')}</label>
-                <textarea class="speaker-instruct form-textarea"
-                    data-i18n-placeholder="voiceDescInstructPlaceholder"
-                    placeholder="${t('voiceDescInstructPlaceholder')}"
-                    rows="2">${speaker.instruct}</textarea>
+
+            <!-- Voice Source Selection (Radio Buttons) -->
+            <div class="voice-source-selector">
+                <label class="voice-source-option${speaker.voice_source === 'voice_design' ? ' active' : ''}">
+                    <input type="radio" name="speaker-${index}-voice-source" class="speaker-voice-source" value="voice_design" ${speaker.voice_source === 'voice_design' ? 'checked' : ''}>
+                    <span class="voice-source-icon">🎨</span>
+                    <span class="voice-source-label">Voice Design</span>
+                </label>
+                <label class="voice-source-option${speaker.voice_source === 'saved_voice' ? ' active' : ''}">
+                    <input type="radio" name="speaker-${index}-voice-source" class="speaker-voice-source" value="saved_voice" ${speaker.voice_source === 'saved_voice' ? 'checked' : ''}>
+                    <span class="voice-source-icon">💾</span>
+                    <span class="voice-source-label">Saved Voices</span>
+                </label>
             </div>
+
+            <!-- Voice Design Panel -->
+            <div class="voice-design-panel" style="display: ${voiceDesignStyle};">
+                <div class="form-group">
+                    <label class="form-label">${t('voiceDescription')}</label>
+                    <textarea class="speaker-instruct form-textarea"
+                        data-i18n-placeholder="voiceDescInstructPlaceholder"
+                        placeholder="${t('voiceDescInstructPlaceholder')}"
+                        rows="2">${speaker.instruct || ''}</textarea>
+                </div>
+            </div>
+
+            <!-- Saved Voice Panel -->
+            <div class="saved-voice-panel" style="display: ${savedVoiceStyle};">
+                <label class="form-label">Select Saved Voice</label>
+                ${savedVoicesHtml}
+            </div>
+
             <div class="form-group">
                 <label class="form-label">${t('textToSpeak')}</label>
                 <textarea class="speaker-text form-textarea"
                     data-i18n-placeholder="textPlaceholder"
                     placeholder="${t('textPlaceholder')}"
-                    rows="3">${speaker.text}</textarea>
+                    rows="3">${speaker.text || ''}</textarea>
             </div>
             <div class="form-group">
                 <label class="form-label">${t('language')}</label>
@@ -2049,7 +2136,9 @@ function addConversationSpeaker() {
     state.conversationSpeakers.push({
         id: newId,
         text: '',
+        voice_source: 'voice_design',
         instruct: '',
+        prompt_id: '',
         language: 'English'
     });
     renderConversationSpeakers();
@@ -2080,19 +2169,37 @@ async function generateConversation() {
     let hasError = false;
 
     speakerCards.forEach(card => {
-        const instruct = card.querySelector('.speaker-instruct').value.trim();
+        const voiceSourceEl = card.querySelector('.speaker-voice-source:checked');
+        const voiceSource = voiceSourceEl ? voiceSourceEl.value : 'voice_design';
         const text = card.querySelector('.speaker-text').value.trim();
         const language = card.querySelector('.speaker-language').value;
+        const instruct = card.querySelector('.speaker-instruct')?.value.trim() || '';
+        const promptIdEl = card.querySelector('.speaker-prompt-id:checked');
+        const promptId = promptIdEl ? promptIdEl.value : '';
 
-        if (!instruct || !text) {
+        // Validation based on voice source
+        if (voiceSource === 'voice_design' && !instruct) {
+            showToast('Please enter a voice description for all Voice Design speakers', 'warning');
+            hasError = true;
+        }
+        if (voiceSource === 'saved_voice' && !promptId) {
+            showToast('Please select a saved voice for all Saved Voice speakers', 'warning');
+            hasError = true;
+        }
+        if (!text) {
             hasError = true;
         }
 
-        speakers.push({ instruct, text, language });
+        speakers.push({
+            voice_source: voiceSource,
+            text: text,
+            language: language,
+            instruct: voiceSource === 'voice_design' ? instruct : undefined,
+            prompt_id: voiceSource === 'saved_voice' ? promptId : undefined
+        });
     });
 
     if (hasError) {
-        showToast('Please fill in all speaker fields', 'warning');
         return;
     }
 
@@ -3291,15 +3398,78 @@ function initConversationTab() {
         };
     }
 
-    // Delegate remove speaker button clicks
+    // Load saved voices on init
+    loadSavedPrompts();
+
+    // Delegate events for speaker cards container
     const container = document.getElementById('conv-speakers-container');
     if (container) {
+        // Remove speaker button clicks
         container.addEventListener('click', (e) => {
             if (e.target.classList.contains('btn-remove-speaker')) {
                 const index = parseInt(e.target.dataset.speakerIndex, 10);
                 removeConversationSpeaker(index);
             }
         });
+
+        // Voice source change handler (radio buttons)
+        container.addEventListener('change', (e) => {
+            if (e.target.classList.contains('speaker-voice-source')) {
+                const card = e.target.closest('.conversation-speaker-card');
+                const voiceSource = e.target.value;
+                const voiceDesignPanel = card.querySelector('.voice-design-panel');
+                const savedVoicePanel = card.querySelector('.saved-voice-panel');
+                const voiceSourceLabels = card.querySelectorAll('.voice-source-option');
+
+                // Update panel visibility
+                if (voiceSource === 'voice_design') {
+                    voiceDesignPanel.style.display = 'block';
+                    savedVoicePanel.style.display = 'none';
+                } else {
+                    voiceDesignPanel.style.display = 'none';
+                    savedVoicePanel.style.display = 'block';
+                }
+
+                // Update active state on labels
+                voiceSourceLabels.forEach(label => {
+                    const input = label.querySelector('input[type="radio"]');
+                    if (input && input.checked) {
+                        label.classList.add('active');
+                    } else {
+                        label.classList.remove('active');
+                    }
+                });
+            }
+
+            // Saved voice card selection
+            if (e.target.classList.contains('speaker-prompt-id')) {
+                const card = e.target.closest('.conversation-speaker-card');
+                const voiceCards = card.querySelectorAll('.saved-voice-card');
+                voiceCards.forEach(vc => vc.classList.remove('selected'));
+                if (e.target.checked) {
+                    e.target.closest('.saved-voice-card').classList.add('selected');
+                }
+            }
+        });
+    }
+}
+
+/**
+ * Load saved voice prompts from server
+ */
+async function loadSavedPrompts() {
+    try {
+        const response = await fetch(CONFIG.endpoints.base.prompts, {
+            headers: getHeaders()
+        });
+        if (response.ok) {
+            const data = await response.json();
+            state.savedPrompts = data.prompts || [];
+            // Re-render conversation speakers to show updated saved voices
+            renderConversationSpeakers();
+        }
+    } catch (e) {
+        console.error('Failed to load saved prompts:', e);
     }
 }
 

@@ -1,6 +1,6 @@
 # MLX Audio TTS
 
-基于 Apple MLX 框架的多模态文本转语音（TTS）合成工作区。支持自定义语音、语音设计和语音克隆三种模式。
+基于 Apple MLX 框架的多模态文本转语音（TTS）合成工作区。支持自定义语音、语音设计、语音克隆和**多人对话**四种模式。
 
 Forked from [Blizaine qwen3-tts-apple-silicon](https://github.com/Blizaine/qwen3-tts-apple-silicon/tree/main)
 
@@ -40,6 +40,66 @@ python main.py
 | **Custom Voice** | 预设说话人 + 情感控制 | `CustomVoice` 标签页 / `/api/v1/custom-voice` |
 | **Voice Design** | 自然语言描述生成语音  | `VoiceDesign` 标签页 / `/api/v1/voice-design` |
 | **Voice Clone**  | 从参考音频克隆语音    | `VoiceClone` 标签页 / `/api/v1/base/clone`    |
+
+---
+
+## ✨ 多人对话模式（Multi-Person Conversation）
+
+**创建多人对话，一键生成多角色音频！**
+
+在 Web Demo 的 "Multi-Person Conversation" 标签页中，您可以：
+
+### 核心特性
+
+1. **多说话者支持**
+   - 支持 2-5 个说话者
+   - 每个说话者独立配置声音和文本
+   - 批量生成，自动拼接音频
+
+2. **灵活的声音来源**
+   - **Voice Design**：用自然语言描述声音特征（如 "A warm, friendly female voice"）
+   - **Saved Voices**：从语音克隆中保存的声音库中选择
+
+3. **直观的可视化界面**
+   - 彩色说话者卡片，一目了然
+   - 时间线显示各说话者片段
+   - 点击跳转到指定说话者
+   - 实时高亮当前播放的说话者
+
+4. **多语言支持**
+   - 支持中文、英语、日语、韩语等多种语言
+   - 每个说话者可独立设置语言
+   - 界面支持中英文切换
+
+### 使用示例
+
+```json
+POST /api/v1/conversation/generate
+{
+  "speakers": [
+    {
+      "voice_source": "voice_design",
+      "text": "你好！欢迎参加我们的节目。",
+      "instruct": "一个温暖友好的男声",
+      "language": "Chinese"
+    },
+    {
+      "voice_source": "saved_voice",
+      "text": "谢谢邀请！很高兴来到这里。",
+      "prompt_id": "abc123-def456",
+      "language": "Chinese"
+    }
+  ],
+  "speed": 1.0,
+  "response_format": "base64"
+}
+```
+
+### API 端点
+
+```
+POST /api/v1/conversation/generate    # 生成多人对话
+```
 
 ## 模型列表
 

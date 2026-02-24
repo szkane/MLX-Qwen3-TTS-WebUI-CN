@@ -193,8 +193,13 @@ class LanguagesResponse(BaseModel):
 
 class ConversationSpeaker(BaseModel):
     text: str
-    instruct: str
     language: Optional[str] = "Auto"
+    # Voice source selection
+    voice_source: str = "voice_design"  # "voice_design" or "saved_voice"
+    # For voice_design: natural language voice description
+    instruct: Optional[str] = None
+    # For saved_voice: the prompt ID to use
+    prompt_id: Optional[str] = None
 
 
 class ConversationGenerateRequest(BaseModel):
@@ -464,20 +469,58 @@ async def generate_conversation(request: ConversationGenerateRequest):
     try:
         logger.info(f"Generating conversation with {len(request.speakers)} speakers")
 
-        model = get_available_model("voice_design")
-
         # Generate each speaker's audio segment
         segments = []
         total_duration = 0
         sr = None
 
         for i, speaker in enumerate(request.speakers):
-            # Generate audio for this speaker
-            audio_data, sr = generate_with_temp_dir(
-                model,
-                text=speaker.text,
-                instruct=speaker.instruct,
-            )
+            if speaker.voice_source == "saved_voice":
+                # Use saved voice (prompt_id required)
+                if not speaker.prompt_id:
+                    raise HTTPException(status_code=400, detail=f"Speaker {i+1}: prompt_id required for saved_voice source")
+
+                if speaker.prompt_id not in saved_voice_prompts:
+                    raise HTTPException(status_code=404, detail=f"Speaker {i+1}: Prompt ID not found: {speaker.prompt_id}")
+
+                prompt_data = saved_voice_prompts[speaker.prompt_id]
+                model = get_available_model("base")
+
+                # Decode reference audio and create temp file
+                import tempfile
+                audio_bytes = ensure_wav_bytes(base64.b64decode(prompt_data["ref_audio_base64"]))
+                temp_ref_file = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
+                temp_ref_file.write(audio_bytes)
+                temp_ref_file.close()
+
+                try:
+                    # Generate using saved voice prompt
+                    audio_data, sr = generate_with_temp_dir(
+                        model,
+                        text=speaker.text,
+                        language=speaker.language,
+                        ref_audio=temp_ref_file.name,
+                        ref_text=prompt_data.get("ref_text") or ".",
+                        speed=request.speed,
+                    )
+                finally:
+                    try:
+                        os.unlink(temp_ref_file.name)
+                    except:
+                        pass
+            else:
+                # Use voice design (instruct required)
+                if not speaker.instruct:
+                    raise HTTPException(status_code=400, detail=f"Speaker {i+1}: instruct required for voice_design source")
+
+                model = get_available_model("voice_design")
+
+                # Generate using voice design
+                audio_data, sr = generate_with_temp_dir(
+                    model,
+                    text=speaker.text,
+                    instruct=speaker.instruct,
+                )
 
             duration = len(audio_data) / sr
             segments.append(ConversationAudioSegment(
@@ -494,6 +537,8 @@ async def generate_conversation(request: ConversationGenerateRequest):
             format="wav"
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error generating conversation: {e}")
         raise HTTPException(status_code=500, detail=str(e))

@@ -2331,6 +2331,136 @@ audio::-webkit-media-controls-volume-slider::-webkit-slider-thumb {
     100% { opacity: 1; transform: scale(1.02); }
 }
 
+/* Voice Source Selection Panels */
+.voice-design-panel,
+.saved-voice-panel {
+    margin-bottom: var(--space-md);
+    padding: var(--space-md);
+    background: var(--bg-surface);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+}
+
+.voice-design-panel {
+    border-left: 3px solid var(--accent-cyan);
+}
+
+.saved-voice-panel {
+    border-left: 3px solid var(--accent-amber);
+}
+
+/* Voice Source Selector (Radio Buttons) */
+.voice-source-selector {
+    display: flex;
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
+}
+
+.voice-source-option {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-lg);
+    background: var(--bg-card);
+    border: 2px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    flex: 1;
+    max-width: 200px;
+}
+
+.voice-source-option:hover {
+    border-color: var(--border-active);
+    background: var(--bg-surface);
+}
+
+.voice-source-option.active {
+    border-color: var(--accent-cyan);
+    background: rgba(0, 245, 212, 0.05);
+}
+
+.voice-source-option input[type="radio"] {
+    display: none;
+}
+
+.voice-source-icon {
+    font-size: 1.25rem;
+}
+
+.voice-source-label {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+/* Saved Voices Grid */
+.saved-voices-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-md);
+    margin-top: var(--space-sm);
+}
+
+.saved-voice-card {
+    display: block;
+    background: var(--bg-card);
+    border: 2px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.saved-voice-card:hover {
+    border-color: var(--accent-cyan);
+    background: var(--bg-surface);
+    transform: translateY(-2px);
+}
+
+.saved-voice-card.selected {
+    border-color: var(--accent-cyan);
+    background: rgba(0, 245, 212, 0.05);
+    box-shadow: 0 0 0 2px rgba(0, 245, 212, 0.2);
+}
+
+.saved-voice-card input[type="radio"] {
+    display: none;
+}
+
+.saved-voice-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.saved-voice-name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+.saved-voice-text {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.saved-voices-empty {
+    padding: var(--space-lg);
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.saved-voices-empty strong {
+    color: var(--accent-cyan);
+}
+
 /* Add Speaker Button Container */
 #conv-add-speaker-btn {
     width: 100%;
