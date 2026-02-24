@@ -1992,16 +1992,26 @@ function renderConversationSpeakers() {
             const instructEl = card.querySelector('.speaker-instruct');
             const textEl = card.querySelector('.speaker-text');
             const languageEl = card.querySelector('.speaker-language');
-            const promptIdEl = card.querySelector('.speaker-prompt-id:checked');
 
+            // Save voice_source from radio selection
             if (voiceSourceEl) state.conversationSpeakers[index].voice_source = voiceSourceEl.value;
             if (textEl) state.conversationSpeakers[index].text = textEl.value;
             if (languageEl) state.conversationSpeakers[index].language = languageEl.value;
-            if (promptIdEl) {
-                state.conversationSpeakers[index].prompt_id = promptIdEl.value;
+
+            // Only save prompt_id when saved_voice panel is active AND a value is selected
+            const savedVoicePanel = card.querySelector('.saved-voice-panel');
+            const isSavedVoiceActive = savedVoicePanel && savedVoicePanel.style.display !== 'none';
+            if (isSavedVoiceActive) {
+                const promptIdEl = card.querySelector('.speaker-prompt-id:checked');
+                if (promptIdEl && promptIdEl.value) {
+                    state.conversationSpeakers[index].prompt_id = promptIdEl.value;
+                }
             }
-            // Save instruct from textarea
-            if (instructEl) {
+
+            // Only save instruct when voice_design panel is active
+            const voiceDesignPanel = card.querySelector('.voice-design-panel');
+            const isVoiceDesignActive = voiceDesignPanel && voiceDesignPanel.style.display !== 'none';
+            if (isVoiceDesignActive && instructEl) {
                 state.conversationSpeakers[index].instruct = instructEl.value;
             }
         }
