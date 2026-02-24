@@ -1679,7 +1679,7 @@ async function generateCustomVoice() {
     const text = document.getElementById('cv-text').value.trim();
     const language = document.getElementById('cv-language').value;
     const speed = parseFloat(document.getElementById('cv-speed').value);
-    const instruct = document.getElementById('cv-instruct').value.trim() || null;
+    const instruct = document.getElementById('cv-instruct').value.trim() || "";
 
     if (!text) {
         showToast('Please enter text to synthesize', 'warning');
