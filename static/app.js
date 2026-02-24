@@ -3458,6 +3458,14 @@ function initConversationTab() {
                 voiceCards.forEach(vc => vc.classList.remove('selected'));
                 if (e.target.checked) {
                     e.target.closest('.saved-voice-card').classList.add('selected');
+
+                    // Save prompt_id to state immediately
+                    const container = document.getElementById('conv-speakers-container');
+                    const cards = Array.from(container.querySelectorAll('.conversation-speaker-card'));
+                    const index = cards.indexOf(card);
+                    if (index >= 0 && e.target.value) {
+                        state.conversationSpeakers[index].prompt_id = e.target.value;
+                    }
                 }
             }
         });
