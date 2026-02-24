@@ -84,12 +84,12 @@ def ensure_wav_bytes(audio_bytes: bytes) -> bytes:
 
 # Model paths mapping
 MODEL_PATHS = {
-    "custom_voice_pro": "Qwen3-TTS-Custom",
-    "custom_voice_lite": "Qwen3-TTS-Custom",
-    "voice_design_pro": "Qwen3-TTS-Design",
-    "voice_design_lite": "Qwen3-TTS-Design",
-    "base_pro": "Qwen3-TTS-Base",
-    "base_lite": "Qwen3-TTS-Base",
+    "custom_voice_pro": "Qwen3-TTS-12Hz-1.7B-CustomVoice-bf16",
+    "custom_voice_lite": "Qwen3-TTS-12Hz-1.7B-CustomVoice-bf16",
+    "voice_design_pro": "Qwen3-TTS-12Hz-1.7B-VoiceDesign-bf16",
+    "voice_design_lite": "Qwen3-TTS-12Hz-1.7B-VoiceDesign-bf16",
+    "base_pro": "Qwen3-TTS-12Hz-1.7B-Base-bf16",
+    "base_lite": "Qwen3-TTS-12Hz-1.7B-Base-bf16",
 }
 
 # Global model cache

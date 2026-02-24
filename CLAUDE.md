@@ -49,9 +49,9 @@ This is a text-to-speech synthesis workspace using Apple's MLX framework with th
 | Model | Purpose | Key Method |
 |-------|---------|------------|
 | **Chatterbox-Turbo-FP16** | Expressive storytelling + voice cloning | `generate(text, ref_audio)` |
-| **Qwen3-TTS-Base** | Production TTS with predefined voices | `generate(text, voice, language)` |
-| **Qwen3-TTS-Custom** | Emotion-controlled speech | `generate_custom_voice(text, speaker, language, instruct)` |
-| **Qwen3-TTS-Design** | Custom voice from description | `generate_voice_design(text, language, instruct)` |
+| **Qwen3-TTS-12Hz-1.7B-Base-bf16** | Production TTS with predefined voices | `generate(text, voice, language)` |
+| **Qwen3-TTS-12Hz-1.7B-CustomVoice-bf16** | Emotion-controlled speech | `generate_custom_voice(text, speaker, language, instruct)` |
+| **Qwen3-TTS-12Hz-1.7B-VoiceDesign-bf16** | Custom voice from description | `generate_voice_design(text, language, instruct)` |
 
 ### Model Variants
 
@@ -81,9 +81,9 @@ load_model(folder_name) → model.generate*(...) → list(results) →
 All models are stored in the `models/` directory:
 
 - `models/Chatterbox-Turbo-FP16/` - Expressive storytelling model
-- `models/Qwen3-TTS-Base/` - Base model with predefined speakers
-- `models/Qwen3-TTS-Custom/` - Custom voice model with speaker + emotion control
-- `models/Qwen3-TTS-Design/` - Voice design from text description
+- `models/Qwen3-TTS-12Hz-1.7B-Base-bf16/` - Base model with predefined speakers
+- `models/Qwen3-TTS-12Hz-1.7B-CustomVoice-bf16/` - Custom voice model with speaker + emotion control
+- `models/Qwen3-TTS-12Hz-1.7B-VoiceDesign-bf16/` - Voice design from text description
 
 ## API Reference
 
@@ -136,9 +136,9 @@ The `static/` folder contains a production-ready web interface:
 mlx_test/
 ├── models/                    # All models stored here
 │   ├── Chatterbox-Turbo-FP16/
-│   ├── Qwen3-TTS-Base/
-│   ├── Qwen3-TTS-Custom/
-│   └── Qwen3-TTS-Design/
+│   ├── Qwen3-TTS-12Hz-1.7B-Base-bf16/
+│   ├── Qwen3-TTS-12Hz-1.7B-CustomVoice-bf16/
+│   └── Qwen3-TTS-12Hz-1.7B-VoiceDesign-bf16/
 ├── output/                    # Legacy output directory
 ├── outputs/                   # New scripts output directory
 │   ├── CustomVoice/

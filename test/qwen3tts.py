@@ -13,7 +13,7 @@ model = None
 
 if args.model == "base":
     # Base model with predefined voices
-    model = load_model("../models/Qwen3-TTS-Base")
+    model = load_model("../models/Qwen3-TTS-12Hz-1.7B-Base-bf16")
     results = list(model.generate(
         text="Hello, Hilson.Donn't watch Youtube.",
         voice="Aiden",
@@ -22,7 +22,7 @@ if args.model == "base":
 
 elif args.model == "clone":
     # Voice Clone
-    model = load_model("../models/Qwen3-TTS-Base")
+    model = load_model("../models/Qwen3-TTS-12Hz-1.7B-Base-bf16")
     results = list(model.generate(
         text="What the frog. What the frog. What the frog. what the hell. hilson is beautiful.",
         
@@ -35,7 +35,7 @@ elif args.model == "custom":
     # CustomVoice (Emotion Control)
     #Chinese: Vivian, Serena, Uncle_Fu, Dylan (Beijing Dialect), Eric (Sichuan Dialect)
     #English: Ryan, Aiden
-    model = load_model("../models/Qwen3-TTS-Custom")
+    model = load_model("../models/Qwen3-TTS-12Hz-1.7B-CustomVoice-bf16")
     results = list(model.generate_custom_voice(
         text="I'm so excited to meet you!",
         speaker="Vivian",
@@ -45,7 +45,7 @@ elif args.model == "custom":
 
 elif args.model == "design":
     # Create any voice from a text description
-    model = load_model("../models/Qwen3-TTS-Design")
+    model = load_model("../models/Qwen3-TTS-12Hz-1.7B-VoiceDesign-bf16")
     results = list(model.generate_voice_design(
         text="The girl goes to bed.The girl eats supper.The girl goes shopping.The girl goes to the movies.The girl rides in the car.The girl goes to school.The girl stays home.The girl is hungry.",
         language="English",

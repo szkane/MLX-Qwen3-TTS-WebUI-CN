@@ -35,13 +35,13 @@ SAMPLE_RATE = 24000
 # Model Definitions
 MODELS = {
     # Pro (1.7B) - Best Quality
-    "pro_custom": {"name": "Custom Voice (Pro 1.7B)", "folder": "Qwen3-TTS-Custom", "mode": "custom"},
-    "pro_design": {"name": "Voice Design (Pro 1.7B)", "folder": "Qwen3-TTS-Design", "mode": "design"},
-    "pro_clone": {"name": "Voice Clone (Pro 1.7B)", "folder": "Qwen3-TTS-Base", "mode": "clone"},
+    "pro_custom": {"name": "Custom Voice (Pro 1.7B)", "folder": "Qwen3-TTS-12Hz-1.7B-CustomVoice-bf16", "mode": "custom"},
+    "pro_design": {"name": "Voice Design (Pro 1.7B)", "folder": "Qwen3-TTS-12Hz-1.7B-VoiceDesign-bf16", "mode": "design"},
+    "pro_clone": {"name": "Voice Clone (Pro 1.7B)", "folder": "Qwen3-TTS-12Hz-1.7B-Base-bf16", "mode": "clone"},
     # Lite (0.6B) - Faster (use same models if no separate lite versions)
-    "lite_custom": {"name": "Custom Voice (Lite 0.6B)", "folder": "Qwen3-TTS-Custom", "mode": "custom"},
-    "lite_design": {"name": "Voice Design (Lite 0.6B)", "folder": "Qwen3-TTS-Design", "mode": "design"},
-    "lite_clone": {"name": "Voice Clone (Lite 0.6B)", "folder": "Qwen3-TTS-Base", "mode": "clone"},
+    "lite_custom": {"name": "Custom Voice (Lite 0.6B)", "folder": "Qwen3-TTS-12Hz-1.7B-CustomVoice-bf16", "mode": "custom"},
+    "lite_design": {"name": "Voice Design (Lite 0.6B)", "folder": "Qwen3-TTS-12Hz-1.7B-VoiceDesign-bf16", "mode": "design"},
+    "lite_clone": {"name": "Voice Clone (Lite 0.6B)", "folder": "Qwen3-TTS-12Hz-1.7B-Base-bf16", "mode": "clone"},
 }
 
 # Speaker options

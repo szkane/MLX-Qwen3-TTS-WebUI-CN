@@ -35,13 +35,13 @@ FILENAME_MAX_LEN = 20
 # Model Definitions
 MODELS = {
     # Pro (1.7B)
-    "1": {"name": "Custom Voice", "folder": "Qwen3-TTS-Custom", "mode": "custom", "output_subfolder": "CustomVoice"},
-    "2": {"name": "Voice Design", "folder": "Qwen3-TTS-Design", "mode": "design", "output_subfolder": "VoiceDesign"},
-    "3": {"name": "Voice Cloning", "folder": "Qwen3-TTS-Base", "mode": "clone_manager", "output_subfolder": "Clones"},
+    "1": {"name": "Custom Voice", "folder": "Qwen3-TTS-12Hz-1.7B-CustomVoice-bf16", "mode": "custom", "output_subfolder": "CustomVoice"},
+    "2": {"name": "Voice Design", "folder": "Qwen3-TTS-12Hz-1.7B-VoiceDesign-bf16", "mode": "design", "output_subfolder": "VoiceDesign"},
+    "3": {"name": "Voice Cloning", "folder": "Qwen3-TTS-12Hz-1.7B-Base-bf16", "mode": "clone_manager", "output_subfolder": "Clones"},
     # Lite (0.6B)
-    "4": {"name": "Custom Voice", "folder": "Qwen3-TTS-Custom", "mode": "custom", "output_subfolder": "CustomVoice"},
-    "5": {"name": "Voice Design", "folder": "Qwen3-TTS-Design", "mode": "design", "output_subfolder": "VoiceDesign"},
-    "6": {"name": "Voice Cloning", "folder": "Qwen3-TTS-Base", "mode": "clone_manager", "output_subfolder": "Clones"},
+    "4": {"name": "Custom Voice", "folder": "Qwen3-TTS-12Hz-1.7B-CustomVoice-bf16", "mode": "custom", "output_subfolder": "CustomVoice"},
+    "5": {"name": "Voice Design", "folder": "Qwen3-TTS-12Hz-1.7B-VoiceDesign-bf16", "mode": "design", "output_subfolder": "VoiceDesign"},
+    "6": {"name": "Voice Cloning", "folder": "Qwen3-TTS-12Hz-1.7B-Base-bf16", "mode": "clone_manager", "output_subfolder": "Clones"},
 }
 
 SPEAKER_MAP = {
