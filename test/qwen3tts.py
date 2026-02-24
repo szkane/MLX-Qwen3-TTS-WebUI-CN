@@ -26,7 +26,7 @@ elif args.model == "clone":
     results = list(model.generate(
         text="What the frog. What the frog. What the frog. what the hell. hilson is beautiful.",
         
-        #ref_text="我最喜欢邱润晨。他很可爱。很久以前，在波斯的一个城里住着两兄弟，哥哥明叫卡西姆，弟弟名叫阿里巴巴。",
+        #ref_text="他很可爱。很久以前，在波斯的一个城里住着两兄弟，哥哥明叫卡西姆，弟弟名叫阿里巴巴。",
         ref_audio="./voice_ref/hilson.wav",
         ref_text="he girl goes to bed.The girl eats supper.The girl goes shopping.The girl goes to the movies.The girl rides in the car.The girl goes to school.The girl stays home.The girl is hungry."
     ))
