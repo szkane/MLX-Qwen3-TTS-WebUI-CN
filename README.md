@@ -2,6 +2,8 @@
 
 基于 Apple MLX 框架的多模态文本转语音（TTS）合成工作区。支持自定义语音、语音设计和语音克隆三种模式。
 
+Forked from [Blizaine qwen3-tts-apple-silicon](https://github.com/Blizaine/qwen3-tts-apple-silicon/tree/main)
+
 ## 平台要求
 
 - **操作系统**: macOS only (Apple Silicon M1/M2/M3/M4)
@@ -20,12 +22,12 @@ pip install -U mlx-audio soundfile numpy argparse gradio fastapi uvicorn
 # 下载模型（一次性操作）
 python test/hg-download.py
 
-# 方式 1: Gradio Web UI - 5 标签页界面
-python webui.py --port 7860
-
-# 方式 2: FastAPI 服务 - REST API + Web Demo
+# 方式 1: FastAPI 服务 - REST API + Web Demo (推荐)
 python server.py
 # 访问：http://localhost:7860/demo
+
+# 方式 2: Gradio Web UI - 5 标签页界面
+python webui.py --port 7860
 
 # 方式 3: CLI 交互式命令行
 python main.py
@@ -33,36 +35,36 @@ python main.py
 
 ## 三种工作模式
 
-| 模式 | 功能 | 入口 |
-|------|------|------|
+| 模式             | 功能                  | 入口                                          |
+| ---------------- | --------------------- | --------------------------------------------- |
 | **Custom Voice** | 预设说话人 + 情感控制 | `CustomVoice` 标签页 / `/api/v1/custom-voice` |
-| **Voice Design** | 自然语言描述生成语音 | `VoiceDesign` 标签页 / `/api/v1/voice-design` |
-| **Voice Clone** | 从参考音频克隆语音 | `VoiceClone` 标签页 / `/api/v1/base/clone` |
+| **Voice Design** | 自然语言描述生成语音  | `VoiceDesign` 标签页 / `/api/v1/voice-design` |
+| **Voice Clone**  | 从参考音频克隆语音    | `VoiceClone` 标签页 / `/api/v1/base/clone`    |
 
 ## 模型列表
 
-| 模型 | 用途 | 关键方法 |
-|------|------|----------|
-| **Chatterbox-Turbo-FP16** | 富有表现力的讲故事 + 语音克隆 | `generate(text, ref_audio)` |
-| **Qwen3-TTS-12Hz-1.7B-Base-bf16** | 生产级 TTS，预设语音 | `generate(text, voice, language)` |
-| **Qwen3-TTS-12Hz-1.7B-CustomVoice-bf16** | 情感控制语音合成 | `generate_custom_voice(text, speaker, language, instruct)` |
-| **Qwen3-TTS-12Hz-1.7B-VoiceDesign-bf16** | 从描述生成自定义语音 | `generate_voice_design(text, language, instruct)` |
+| 模型                                     | 用途                          | 关键方法                                                   |
+| ---------------------------------------- | ----------------------------- | ---------------------------------------------------------- |
+| **Chatterbox-Turbo-FP16**                | 富有表现力的讲故事 + 语音克隆 | `generate(text, ref_audio)`                                |
+| **Qwen3-TTS-12Hz-1.7B-Base-bf16**        | 生产级 TTS，预设语音          | `generate(text, voice, language)`                          |
+| **Qwen3-TTS-12Hz-1.7B-CustomVoice-bf16** | 情感控制语音合成              | `generate_custom_voice(text, speaker, language, instruct)` |
+| **Qwen3-TTS-12Hz-1.7B-VoiceDesign-bf16** | 从描述生成自定义语音          | `generate_voice_design(text, language, instruct)`          |
 
 ### 模型变体
 
-| 变体 | 大小 | 内存占用 | 质量 |
-|------|------|----------|------|
-| **Pro (1.7B)** | ~5-6GB | 最佳质量，较慢 |
+| 变体            | 大小   | 内存占用       | 质量 |
+| --------------- | ------ | -------------- | ---- |
+| **Pro (1.7B)**  | ~5-6GB | 最佳质量，较慢 |
 | **Lite (0.6B)** | ~2-3GB | 更快，良好质量 |
 
 ### 支持的说话人
 
-| 语言 | 说话人 |
-|------|--------|
+| 语言     | 说话人                                      |
+| -------- | ------------------------------------------- |
 | **英语** | Ryan, Aiden, Ethan, Chelsie, Serena, Vivian |
-| **中文** | Vivian, Serena, Uncle_Fu, Dylan, Eric |
-| **日语** | Ono_Anna |
-| **韩语** | Sohee |
+| **中文** | Vivian, Serena, Uncle_Fu, Dylan, Eric       |
+| **日语** | Ono_Anna                                    |
+| **韩语** | Sohee                                       |
 
 ## 目录结构
 
@@ -97,6 +99,7 @@ mlx_test/
 ## API 端点
 
 ### 自定义语音
+
 ```
 POST /api/v1/custom-voice/generate    # 生成语音（说话人 + 情感）
 GET  /api/v1/speakers                 # 获取可用说话人列表
@@ -104,17 +107,20 @@ GET  /api/v1/languages                # 获取可用语言列表
 ```
 
 ### 语音设计
+
 ```
 POST /api/v1/voice-design/generate    # 从描述生成语音
 ```
 
 ### 语音克隆
+
 ```
 POST /api/v1/base/clone               # 从参考音频克隆语音
 POST /api/v1/base/clone/stream        # 流式输出克隆语音
 ```
 
 ### 语音提示
+
 ```
 POST /api/v1/base/create-prompt       # 创建语音提示
 POST /api/v1/base/generate-with-prompt # 使用已有提示生成
@@ -123,6 +129,7 @@ DELETE /api/v1/prompts/{id}           # 删除提示
 ```
 
 ### 工具端点
+
 ```
 POST /api/v1/base/transcribe          # 语音转文字
 GET  /api/v1/health                   # 健康检查
@@ -134,21 +141,25 @@ GET  /                                # 重定向到 /demo
 ## 依赖安装
 
 ### 核心依赖
+
 ```bash
 pip install mlx-audio soundfile numpy huggingface_hub
 ```
 
 ### Web UI (Gradio)
+
 ```bash
 pip install gradio
 ```
 
 ### API 服务 (FastAPI)
+
 ```bash
 pip install fastapi uvicorn librosa
 ```
 
 ### 可选依赖
+
 ```bash
 # 语音转文字转录
 pip install mlx-whisper
@@ -178,6 +189,7 @@ python test/chatterbox.py
 ### 情感标签（Chatterbox）
 
 在文本中使用情感标签：
+
 - `[chuckle]` - 轻笑
 - `[gasp]` - 倒吸一口气
 - `[sigh]` - 叹息
